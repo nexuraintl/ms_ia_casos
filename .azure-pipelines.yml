@@ -22,8 +22,8 @@ steps:
   # 1️⃣ Validar que la rama sea dev
   - script: |
       echo "Validando rama..."
-      if [ "$(Build.SourceBranchName)" != "feature/22040_carga_mod_casos " ]; then
-        echo "❌ Solo la rama 'feature/22040_carga_mod_casos ' puede sincronizarse con GitHub."
+      if [ "$(Build.SourceBranchName)" != "feature/22040_carga_mod_casos" ]; then
+        echo "❌ Solo la rama 'feature/22040_carga_mod_casos' puede sincronizarse con GitHub."
         exit 1
       fi
     displayName: "Validar rama origen"
@@ -40,8 +40,8 @@ steps:
       git remote remove github || true
       git remote add github https://$(GITHUB_TOKEN_CASOS)@github.com/$(GITHUB_ORG)/$(GITHUB_REPO).git
 
-      echo "Empujando cambios de 'feature/22040_carga_mod_casos ' (Azure) hacia 'main' (GitHub)..."
-      git push github feature/22040_carga_mod_casos :main --force
+      echo "Empujando cambios de 'feature/22040_carga_mod_casos' (Azure) hacia 'main' (GitHub)..."
+      git push github feature/22040_carga_mod_casos:main --force
 
       echo "✅ Sincronización completada correctamente."
     env:
