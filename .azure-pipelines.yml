@@ -1,0 +1,49 @@
+# .azure-pipelines.yml
+# Sincroniza Azure DevOps (rama dev) -> GitHub (rama main)
+
+trigger:
+  branches:
+    include:
+      - feature/22040_carga_mod_casos  # Solo ejecuta cuando se actualiza la rama dev
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  GIT_USER: "santiago_valenzuela"
+  GIT_EMAIL: "svalenzuela@nexura.com"
+  GITHUB_ORG: "anunezbedoya"      # Reemplaza con tu organización o usuario en GitHub
+  GITHUB_REPO: "casos"    # Reemplaza con el nombre del repositorio en GitHub
+
+steps:
+  - checkout: self
+    clean: true
+
+  # 1️⃣ Validar que la rama sea dev
+  - script: |
+      echo "Validando rama..."
+      if [ "$(Build.SourceBranchName)" != "feature/22040_carga_mod_casos " ]; then
+        echo "❌ Solo la rama 'feature/22040_carga_mod_casos ' puede sincronizarse con GitHub."
+        exit 1
+      fi
+    displayName: "Validar rama origen"
+
+  # 2️⃣ Configurar Git
+  - script: |
+      git config --global user.name "$(GIT_USER)"
+      git config --global user.email "$(GIT_EMAIL)"
+    displayName: "Configurar Git"
+
+  # 3️⃣ Sincronizar con GitHub
+  - script: |
+      echo "Agregando remoto de GitHub..."
+      git remote remove github || true
+      git remote add github https://$(GITHUB_TOKEN_CASOS)@github.com/$(GITHUB_ORG)/$(GITHUB_REPO).git
+
+      echo "Empujando cambios de 'feature/22040_carga_mod_casos ' (Azure) hacia 'main' (GitHub)..."
+      git push github feature/22040_carga_mod_casos :main --force
+
+      echo "✅ Sincronización completada correctamente."
+    env:
+      GITHUB_TOKEN_CASOS: $(GITHUB_TOKEN_CASOS)
+    displayName: "Sincronizar con GitHub"
