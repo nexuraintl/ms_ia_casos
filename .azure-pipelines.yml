@@ -13,8 +13,8 @@ pool:
 variables:
   GIT_USER: "santiago_valenzuela"         # Usuario Azure
   GIT_EMAIL: "svalenzuela@nexura.com"     # Correo Azure
-  GITHUB_ORG: "anunezbedoya"              # Usuario o organización en GitHub
-  GITHUB_REPO: "casos"                    # Nombre del repositorio GitHub
+  GITHUB_ORG: "nexuraintl"              # Usuario o organización en GitHub
+  GITHUB_REPO: "mod_casos"                    # Nombre del repositorio GitHub
 
 steps:
   - checkout: self
