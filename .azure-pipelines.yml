@@ -1,5 +1,5 @@
 # .azure-pipelines.yml
-# Sincroniza Azure DevOps (rama qa) -> GitHub (rama main)
+# Sincroniza Azure DevOps (rama qa) -> GitHub (rama qa)
 
 trigger:
   branches:
@@ -49,8 +49,8 @@ steps:
       echo "Verificando HEAD..."
       git log -1 --oneline
 
-      echo "Empujando historial completo hacia rama main (GitHub)..."
-      git push github HEAD:main --force -v
+      echo "Empujando historial completo hacia rama qa (GitHub)..."
+      git push github HEAD:qa --force -v
 
       echo "Verificando ramas remotas..."
       git ls-remote github
