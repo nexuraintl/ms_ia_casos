@@ -1,0 +1,73 @@
+# .azure-pipelines.yml
+# Sincroniza Azure DevOps -> GitHub (qa y master)
+
+trigger:
+  branches:
+    include:
+      - qa
+      - master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  GIT_USER: "santiago_valenzuela"         # Usuario Azure
+  GIT_EMAIL: "svalenzuela@nexura.com"     # Correo Azure
+  GITHUB_ORG: "nexuraintl"              # Usuario o organización en GitHub
+  GITHUB_REPO: "mod_casos"                    # Nombre del repositorio GitHub
+
+steps:
+  - checkout: self
+    clean: true
+    persistCredentials: true
+
+  # 1️⃣ Validar rama de origen
+  - script: |
+      echo "Validando rama origen..."
+      echo "Build.SourceBranch = $(Build.SourceBranch)"
+      echo "Build.SourceBranchName = $(Build.SourceBranchName)"
+
+      if [ "$(Build.SourceBranchName)" != "qa" ] && [ "$(Build.SourceBranchName)" != "master" ]; then
+        echo "❌ Solo las ramas 'qa' o 'master' pueden sincronizarse con GitHub."
+        exit 1
+      fi
+    displayName: "Validar rama origen"
+
+  # 2️⃣ Configurar Git
+  - script: |
+      git config --global user.name "$(GIT_USER)"
+      git config --global user.email "$(GIT_EMAIL)"
+    displayName: "Configurar Git"
+
+  # 3️⃣ Sincronizar con GitHub
+  - script: |
+      echo "Preparando entorno Git..."
+      git fetch --unshallow || true
+      git fetch --all
+
+      echo "Configurando remoto de GitHub..."
+      git remote remove github || true
+      git remote add github https://$(GITHUB_TOKEN_NEXURAINTL)@github.com/$(GITHUB_ORG)/$(GITHUB_REPO).git
+
+      SOURCE_BRANCH="$(Build.SourceBranchName)"
+      TARGET_BRANCH="$SOURCE_BRANCH"
+
+      echo "Sincronizando rama $SOURCE_BRANCH (Azure) -> $TARGET_BRANCH (GitHub)..."
+
+      echo "Verificando si existe la rama en GitHub..."
+      if git ls-remote --exit-code github "refs/heads/$TARGET_BRANCH"; then
+        echo "Rama $TARGET_BRANCH ya existe en GitHub. Actualizando..."
+      else
+        echo "Rama $TARGET_BRANCH no existe en GitHub. Creándola..."
+        git push github HEAD:refs/heads/$TARGET_BRANCH -f
+        echo "✅ Rama $TARGET_BRANCH creada en GitHub."
+      fi
+
+      echo "Empujando commits a GitHub..."
+      git push github HEAD:$TARGET_BRANCH --force -v
+
+      echo "Verificando ramas remotas..."
+      git ls-remote github
+    env:
+      GITHUB_TOKEN_NEXURAINTL: $(GITHUB_TOKEN_NEXURAINTL)
+    displayName: "Sincronizar con GitHub"
