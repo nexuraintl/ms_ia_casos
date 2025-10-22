@@ -1,29 +1,34 @@
 # .azure-pipelines.yml
-# Sincroniza Azure DevOps (rama dev) -> GitHub (rama main)
+# Sincroniza Azure DevOps -> GitHub (qa y master)
 
 trigger:
   branches:
     include:
-      - feature/22040_carga_mod_casos  # Solo ejecuta cuando se actualiza la rama dev
+      - qa
+      - master
 
 pool:
   vmImage: ubuntu-latest
 
 variables:
-  GIT_USER: "santiago_valenzuela"
-  GIT_EMAIL: "svalenzuela@nexura.com"
-  GITHUB_ORG: "anunezbedoya"      # Reemplaza con tu organización o usuario en GitHub
-  GITHUB_REPO: "casos"    # Reemplaza con el nombre del repositorio en GitHub
+  GIT_USER: "santiago_valenzuela"         # Usuario Azure
+  GIT_EMAIL: "svalenzuela@nexura.com"     # Correo Azure
+  GITHUB_ORG: "anunezbedoya"              # Usuario o organización en GitHub
+  GITHUB_REPO: "casos"                    # Nombre del repositorio GitHub
 
 steps:
   - checkout: self
     clean: true
+    persistCredentials: true
 
-  # 1️⃣ Validar que la rama sea dev
+  # 1️⃣ Validar rama de origen
   - script: |
-      echo "Validando rama..."
-      if [ "$(Build.SourceBranchName)" != "feature/22040_carga_mod_casos" ]; then
-        echo "❌ Solo la rama 'feature/22040_carga_mod_casos' puede sincronizarse con GitHub."
+      echo "Validando rama origen..."
+      echo "Build.SourceBranch = $(Build.SourceBranch)"
+      echo "Build.SourceBranchName = $(Build.SourceBranchName)"
+
+      if [ "$(Build.SourceBranchName)" != "qa" ] && [ "$(Build.SourceBranchName)" != "master" ]; then
+        echo "❌ Solo las ramas 'qa' o 'master' pueden sincronizarse con GitHub."
         exit 1
       fi
     displayName: "Validar rama origen"
@@ -36,14 +41,33 @@ steps:
 
   # 3️⃣ Sincronizar con GitHub
   - script: |
-      echo "Agregando remoto de GitHub..."
+      echo "Preparando entorno Git..."
+      git fetch --unshallow || true
+      git fetch --all
+
+      echo "Configurando remoto de GitHub..."
       git remote remove github || true
       git remote add github https://$(GITHUB_TOKEN_CASOS)@github.com/$(GITHUB_ORG)/$(GITHUB_REPO).git
 
-      echo "Empujando cambios de 'feature/22040_carga_mod_casos' (Azure) hacia 'main' (GitHub)..."
-      git push github feature/22040_carga_mod_casos:main --force
+      SOURCE_BRANCH="$(Build.SourceBranchName)"
+      TARGET_BRANCH="$SOURCE_BRANCH"
 
-      echo "✅ Sincronización completada correctamente."
+      echo "Sincronizando rama $SOURCE_BRANCH (Azure) -> $TARGET_BRANCH (GitHub)..."
+
+      echo "Verificando si existe la rama en GitHub..."
+      if git ls-remote --exit-code github "refs/heads/$TARGET_BRANCH"; then
+        echo "Rama $TARGET_BRANCH ya existe en GitHub. Actualizando..."
+      else
+        echo "Rama $TARGET_BRANCH no existe en GitHub. Creándola..."
+        git push github HEAD:refs/heads/$TARGET_BRANCH -f
+        echo "✅ Rama $TARGET_BRANCH creada en GitHub."
+      fi
+
+      echo "Empujando commits a GitHub..."
+      git push github HEAD:$TARGET_BRANCH --force -v
+
+      echo "Verificando ramas remotas..."
+      git ls-remote github
     env:
       GITHUB_TOKEN_CASOS: $(GITHUB_TOKEN_CASOS)
     displayName: "Sincronizar con GitHub"
