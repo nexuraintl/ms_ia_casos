@@ -47,7 +47,7 @@ steps:
 
       echo "Configurando remoto de GitHub..."
       git remote remove github || true
-      git remote add github https://$(GITHUB_TOKEN_CASOS)@github.com/$(GITHUB_ORG)/$(GITHUB_REPO).git
+      git remote add github https://$(GITHUB_TOKEN_NEXURAINTL)@github.com/$(GITHUB_ORG)/$(GITHUB_REPO).git
 
       SOURCE_BRANCH="$(Build.SourceBranchName)"
       TARGET_BRANCH="$SOURCE_BRANCH"
@@ -69,5 +69,5 @@ steps:
       echo "Verificando ramas remotas..."
       git ls-remote github
     env:
-      GITHUB_TOKEN_CASOS: $(GITHUB_TOKEN_CASOS)
+      GITHUB_TOKEN_NEXURAINTL: $(GITHUB_TOKEN_NEXURAINTL)
     displayName: "Sincronizar con GitHub"
