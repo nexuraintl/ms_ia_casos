@@ -4,7 +4,7 @@
 trigger:
   branches:
     include:
-      - feature/22040_carga_mod_casos
+      - qa
 
 pool:
   vmImage: ubuntu-latest
@@ -25,8 +25,8 @@ steps:
       echo "Validando rama..."
       echo "Build.SourceBranchName = '$(Build.SourceBranchName)'"
       echo "Build.SourceBranch = '$(Build.SourceBranch)'"
-      if [ "$(Build.SourceBranch)" != "refs/heads/feature/22040_carga_mod_casos" ]; then
-        echo "❌ Solo la rama 'feature/22040_carga_mod_casos' puede sincronizarse con GitHub."
+      if [ "$(Build.SourceBranch)" != "refs/heads/qa" ]; then
+        echo "❌ Solo la rama 'qa' puede sincronizarse con GitHub."
         exit 1
       fi
     displayName: "Validar rama origen"
