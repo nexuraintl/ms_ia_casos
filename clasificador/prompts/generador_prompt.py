@@ -144,9 +144,17 @@ ANÁLISIS DOCUMENTAL:
 - Usa los documentos complementarios solo para completar datos procesales como juzgado, ciudad, número y fecha de radicación.
 - Todos los documentos pertenecen al mismo proceso judicial.
 
+IMPORTANTE (CLASIFICACIÓN):
+- El campo "clasificacion" **debe** contener exactamente **una** de las siguientes opciones (escoge solo una):
+  ["Administrativa", "Civil", "Laboral", "Penal", "Comercial", "Constitucional",
+   "Contencioso Administrativa", "Familia", "Ambiental", "Electoral",
+   "Disciplinaria", "Policiva", "Agraria", "Fiscal", "Internacional", "Otra"].
+- No inventes valores fuera de esa lista. Si no puedes determinar con certeza cuál aplicar, usa "Otra".
+- No combines ni concatenes categorías (por ejemplo "Civil-Laboral" está prohibido).
+
 OBJETIVO:
 1. Determina el tipo de documento principal (por ejemplo: Demanda, Auto, Tutela, Providencia, Contestación, etc.).
-2. Si se trata de una demanda, identifica la clasificación (civil, laboral, administrativa, penal, constitucional, etc.).
+2. Si se trata de una demanda, identifica la clasificación (una sola de la lista anterior).
 3. Determina el tipo de demanda (por ejemplo: contractual, de nulidad, ejecutiva, de reparación directa, acción de tutela, etc.).
 4. Extrae y consolida la información correspondiente a los siguientes campos, sin duplicados ni repeticiones.
 
@@ -196,6 +204,7 @@ Cada documento está delimitado así:
 CONTENIDO:
 {documentos_texto}
 """
+
     try:
     # ✅ Aquí ya no retornamos, sino que llamamos al endpoint
         response = requests.post(
